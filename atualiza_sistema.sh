@@ -29,15 +29,95 @@ dirMensal=""$mes"_"$n_mes$(date +%Y)""
 dia=$(date +%d)
 #dia=22
 time=$(date +%T)
+DELAY=10 # Number of seconds to display results
 
-echo "==============================" >> /home/mgfacioli/Documentos/processo.log
-echo "Processo realizado em ${dia}/${mes}/${ano}, ${time}." >> /home/mgfacioli/Documentos/processo.log
-echo "Verfificando atualizacoes disponiveis..."
 
-apt update
-apt list --upgradable
+# ====== funcoes do projeto ======
+function separador {
+    echo -e "================================================================================\n"
+    return
+}
 
-total=$(apt list --upgradable | wc -l)
-echo "==================================" >> /home/mgfacioli/Documentos/processo.log
-echo "Total de $total atualizacoes." >> /home/mgfacioli/Documentos/processo.log
-echo "==================================" >> /home/mgfacioli/Documentos/processo.log
+function cabec_abertura {
+    clear
+    separador
+    echo -e "Iniciando processo de upgrade do sistema!!\t\tData ${dia}/${mes}/${ano}, ${time}.\n"
+    echo -e "Host: $HOSTNAME\t\t\tUser:$USER"
+    separador
+}
+
+
+
+# ====== main ======
+
+while true; do
+    # clear
+    cabec_abertura
+
+cat <<- _EOF_
+    Please Select:
+    1. Fazer Update
+    2. Quantidade de pacotes Atualizáveis
+    3. Listar Pacotes Atualizáveis
+    4. Fazer Upgrade
+    0. Quit
+
+_EOF_
+    read -p "Enter selection [0-3] > "
+
+    if [[ "$REPLY" =~ ^[0-4]$ ]]; then
+        if [[ "$REPLY" == 1 ]]; then
+            sudo apt update
+            sleep "$DELAY"
+            continue
+        fi
+        if [[ "$REPLY" == 2 ]]; then
+            total=$(apt list --upgradable | wc -l)
+            echo "Qtd. total de pacotes atualizáveis: $total." 
+            sleep "$DELAY"
+            continue
+        fi        
+        if [[ "$REPLY" == 3 ]]; then
+            sudo apt list --upgradable | tee /media/mgfacioli/PortableSSD/Learning/Linux/Bash_scripts/super_update/log_atualizacao.txt
+            sleep "$DELAY"
+            continue
+        fi
+        if [[ "$REPLY" == 4 ]]; then
+            read -p "Iniciar o Upgrade? [s/n] > "
+            if [[ "$REPLY" == 's' ]]; then
+                echo "Upgrade já vai começar!!"
+                sleep "$DELAY"
+                sudo apt upgrade
+                sleep "$DELAY"
+                continue
+            elif [[ "$REPLY" == 'n' ]]; then
+                echo "Upgrade Cancelado!!"
+                sleep "$DELAY"
+                continue
+            else
+                echo "Entrada inválida."
+                sleep "$DELAY"
+            fi
+        fi
+        if [[ "$REPLY" == 0 ]]; then
+            break
+        fi
+    else
+        echo "Entrada inválida."
+        sleep "$DELAY"
+    fi
+done
+echo "Atualização Encerrada."
+
+
+
+# echo "==============================" >> /home/mgfacioli/Documentos/processo.log
+# echo "Processo realizado em ${dia}/${mes}/${ano}, ${time}." >> /home/mgfacioli/Documentos/processo.log
+# echo "Verfificando atualizacoes disponiveis..."
+
+# apt list --upgradable
+
+# total=$(apt list --upgradable | wc -l)
+# echo "==================================" >> /home/mgfacioli/Documentos/processo.log
+# echo "Total de $total atualizacoes." >> /home/mgfacioli/Documentos/processo.log
+# echo "==================================" >> /home/mgfacioli/Documentos/processo.log
