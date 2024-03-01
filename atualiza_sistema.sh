@@ -28,19 +28,18 @@ esac
 dirMensal=""$mes"_"$n_mes$(date +%Y)""
 dia=$(date +%d)
 #dia=22
-time=$(date +%T)
+
 
 
 # ====== funcoes do projeto ======
 function separador {
-    echo -e "\n================================================================================\n"
+    echo -e "================================================================================"
     return
 }
 
 function cabec_abertura {
-    clear
     separador
-    echo -e "Iniciando processo de upgrade do sistema!!\t\tData ${dia}/${mes}/${ano}, ${time}.\n"
+    echo -e "Iniciando processo de upgrade do sistema!!\t\tData ${dia}/${mes}/${ano}, ${time}."
     echo -e "Host: $HOSTNAME\t\t\tUser:$USER"
     separador
 }
@@ -60,7 +59,9 @@ function rodape () {
 # ====== main ======
 
 while true; do
-    # clear
+    time=$(date +%T)  #Horário da execução. Esta variável tem que estar aqui para que seja atualizada em cada loop.
+
+    clear
     cabec_abertura
 
 cat <<- _EOF_
@@ -74,24 +75,30 @@ _EOF_
     read -p "Opção [A, B, C, D ou Q] > "
 
     case "$REPLY" in
-        q|Q) rodape "Programa encerrado!"
+        q|Q) rodape "Programa encerrado!" 2
             exit
         ;;
-        a|A) rodape "Update já vai começar!!"
+        a|A) rodape "Update já vai começar!!" 2
             sudo apt update
-            rodape
+            rodape "Update finalizado!!!"
         ;;
-        b|B) rodape "Verificando total de pacotes atualizáveis. Aguarde..."
-            total=$(apt list --upgradable | tail -n +2 | wc -l)
+        b|B) rodape "Verificando total de pacotes atualizáveis. Aguarde..." 2
+            lista_pacotes=$(sudo apt list --upgradable)
+            total=$(echo $(echo "$lista_pacotes" | tail -n +2 | wc -l))
             case "$total" in
                 0) rodape "Não há pacotes a serem atualizados."
                 ;;
-                *) rodape "Qtd. total de pacotes atualizáveis: $total." 10
+                *) rodape "Qtd. total de pacotes atualizáveis: $total."
                     read -p "Deseja listar pacotes atualizáveis? [s/n] > "
+                    clear
                     case "$REPLY" in
-                        s|S) sudo apt list --upgradable ## | tee /media/mgfacioli/PortableSSD/Learning/Linux/Bash_scripts/super_update/log_atualizacao.txt
+                        s|S) rodape "Gerando lista de pacotes atualizáveis." 2
+                            echo "$lista_pacotes"
+                            relatorio=$(cabec_abertura)""$(echo -e "\n$lista_pacotes")"\n"$(separador)"\n\n"
+                            echo -e "$relatorio" >> /media/mgfacioli/PortableSSD/Learning/Linux/Bash_scripts/super_update/log_atualizacao.txt
+                            rodape "Listagem finalizada!!!" 5
                         ;;
-                        n|N) rodape "Cancelando."
+                        n|N) rodape "Cancelando." 2
                         ;;
                         *) rodape "Entrada inválida. Digite s ou n."
                         ;;
@@ -103,15 +110,15 @@ _EOF_
             case "$REPLY" in
                 s|S) rodape "Upgrade já vai começar!!"
                     sudo apt upgrade
-                    rodape "Upgrade finalizado!!!"
+                    rodape "Upgrade finalizado!!!" 2
                 ;;
-                n|N) rodape "Upgrade Cancelado!!"
+                n|N) rodape "Upgrade Cancelado!!" 2
                 ;;
-                *) rodape "Entrada inválida. Digite s ou n." 10
+                *) rodape "Entrada inválida. Digite s ou n." 
                 ;;
             esac
         ;;
-        *) rodape "Entrada inválida. Digite uma letra do menu..." 10
+        *) rodape "Entrada inválida. Digite uma letra do menu..."
         ;;
     esac
 done
