@@ -29,8 +29,6 @@ dirMensal=""$mes"_"$n_mes$(date +%Y)""
 dia=$(date +%d)
 #dia=22
 
-
-
 # ====== funcoes do projeto ======
 function separador {
     echo -e "================================================================================"
@@ -40,7 +38,7 @@ function separador {
 function cabec_abertura {
     separador
     echo -e "Iniciando processo de upgrade do sistema!!\t\tData ${dia}/${mes}/${ano}, ${time}."
-    echo -e "Host: $HOSTNAME\t\t\tUser:$USER"
+    echo -e "Host: $HOSTNAME\t\t\t\t\tUser:$USER"
     separador
 }
 
@@ -54,6 +52,79 @@ function rodape () {
     echo -e "$1"
     separador
     sleep "$DELAY" 
+}
+
+write_html_page () {
+cat <<- _EOF_
+<html>
+<head>
+<style>
+/* Style all elements with the class name "cabec_pagina" */
+.cabec_pagina {
+  background-color: tomato;
+  color: white;
+  padding: 40px;
+  text-align: center;
+} 
+/* Style all elements with the class name "cabec_autaliza" */
+.cabec_autaliza {
+  background-color: lightblue;
+  color: black;
+  padding: 10px;
+} 
+/* Style all elements with the class name "sep" */
+.sep {
+  background-color: lightblue;
+  color: black;
+  padding: 10px;
+} 
+</style>
+<title>Relatório de Atualização do Sistema</title>
+</head>
+<body>
+<h1 class="cabec_pagina">Relatório de Atualização do Sistema</h1>
+<pre class="cabec_autaliza">$(cabec_abertura)</pre>
+$1
+$2
+$3
+<pre class="sep">$(separador)</pre>
+</body>
+</html>
+_EOF_
+return
+}
+
+report_update () {
+cat <<- _EOF_
+<h2>Resultado Apt Update</h2>
+<pre>$1</pre>
+_EOF_
+return
+}
+
+report_upgradables () {
+cat <<- _EOF_
+<h2>Resultado Apt List --Upgradables</h2>
+<pre>$1</pre>
+_EOF_
+return
+}
+
+report_upgrade () {
+cat <<- _EOF_
+<h2>Resultado Apt Upgrade</h2>
+<pre>$1</pre>
+_EOF_
+return
+}
+
+end_report () {
+    path_to_log="/media/mgfacioli/PortableSSD/Learning/Linux/Bash_scripts/super_update/"
+    log_filename="log_atualizacao.html"
+
+    write_html_page "$(echo -e "$(report_update "$update_output")")"  \
+                    "$(echo -e "$(report_upgradables "$lista_pacotes")")" \
+                    "$(echo -e "$(report_upgradables "$upgrade_output")")" >> "$path_to_log$log_filename"
 }
 
 # ====== main ======
@@ -76,10 +147,13 @@ _EOF_
 
     case "$REPLY" in
         q|Q) rodape "Programa encerrado!" 2
+            #write_html_page "$(echo -e "$(report_update "$update_output")")"  "$(echo -e "$(report_upgradables "$lista_pacotes")")" "$(echo -e "$(report_upgradables "$upgrade_output")")" > /media/mgfacioli/PortableSSD/Learning/Linux/Bash_scripts/super_update/log_atualizacao.html
+            end_report
             exit
         ;;
         a|A) rodape "Update já vai começar!!" 2
-            sudo apt update
+            update_output=$(sudo apt update)
+            echo "$update_output"
             rodape "Update finalizado!!!"
         ;;
         b|B) rodape "Verificando total de pacotes atualizáveis. Aguarde..." 2
@@ -94,8 +168,6 @@ _EOF_
                     case "$REPLY" in
                         s|S) rodape "Gerando lista de pacotes atualizáveis." 2
                             echo "$lista_pacotes"
-                            relatorio=$(cabec_abertura)""$(echo -e "\n$lista_pacotes")"\n"$(separador)"\n\n"
-                            echo -e "$relatorio" >> /media/mgfacioli/PortableSSD/Learning/Linux/Bash_scripts/super_update/log_atualizacao.txt
                             rodape "Listagem finalizada!!!" 5
                         ;;
                         n|N) rodape "Cancelando." 2
@@ -109,7 +181,8 @@ _EOF_
         c|C) read -p "Iniciar o Upgrade? [s/n] > "
             case "$REPLY" in
                 s|S) rodape "Upgrade já vai começar!!"
-                    sudo apt upgrade
+                    upgrade_output=$(sudo apt upgrade)
+                    echo "$upgrade_output"
                     rodape "Upgrade finalizado!!!" 2
                 ;;
                 n|N) rodape "Upgrade Cancelado!!" 2
