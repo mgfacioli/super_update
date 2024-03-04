@@ -7,6 +7,10 @@
 # Objetivo: Um script para atualizacao do sistema Linux, utilizando apt, mas com algumas opcoes basicas
 #================================================================
 
+# ======== diretiva =======
+# Capturando CTRL C caso usuário interrompa o script antes da conclusão do processo de atualização.
+trap ctrl_c INT
+
 # ====== variáveis globais ======
 day_week_name=$(date +%A)
 ano=$(date +%y)
@@ -30,6 +34,14 @@ dia=$(date +%d)
 #dia=22
 
 # ====== funcoes do projeto ======
+
+function ctrl_c() {
+    echo -e "\n"
+    rodape "Você tentou encerrar script com Ctrl + C.\nPor favor, utilize a opção Q do menu principal para encerrar corretamente." 10
+    return
+}
+
+
 function separador {
     echo -e "================================================================================"
     return
@@ -120,11 +132,11 @@ return
 
 end_report () {
     path_to_log="/media/mgfacioli/PortableSSD/Learning/Linux/Bash_scripts/super_update/"
-    log_filename="log_atualizacao.html"
+    log_filename="log_atualizacao_[${dia}/${mes}/${ano}]_[${time}].html"
 
     write_html_page "$(echo -e "$(report_update "$update_output")")"  \
                     "$(echo -e "$(report_upgradables "$lista_pacotes")")" \
-                    "$(echo -e "$(report_upgradables "$upgrade_output")")" >> "$path_to_log$log_filename"
+                    "$(echo -e "$(report_upgrade "$upgrade_output")")" >> "$path_to_log$log_filename"
 }
 
 # ====== main ======
@@ -180,7 +192,7 @@ _EOF_
         c|C) read -p "Iniciar o Upgrade? [s/n] > "
             case "$REPLY" in
                 s|S) rodape "O Upgrade está em andamento. Aguarde...!!"
-                    upgrade_output=$(sudo apt upgrade)
+                    upgrade_output=$(sudo apt upgrade --assume-yes)
                     echo "$upgrade_output"
                     rodape "Upgrade finalizado!!!" 2
                 ;;
