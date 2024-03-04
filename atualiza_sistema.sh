@@ -147,7 +147,6 @@ _EOF_
 
     case "$REPLY" in
         q|Q) rodape "Programa encerrado!" 2
-            #write_html_page "$(echo -e "$(report_update "$update_output")")"  "$(echo -e "$(report_upgradables "$lista_pacotes")")" "$(echo -e "$(report_upgradables "$upgrade_output")")" > /media/mgfacioli/PortableSSD/Learning/Linux/Bash_scripts/super_update/log_atualizacao.html
             end_report
             exit
         ;;
@@ -180,7 +179,7 @@ _EOF_
         ;;
         c|C) read -p "Iniciar o Upgrade? [s/n] > "
             case "$REPLY" in
-                s|S) rodape "Upgrade já vai começar!!"
+                s|S) rodape "O Upgrade está em andamento. Aguarde...!!"
                     upgrade_output=$(sudo apt upgrade)
                     echo "$upgrade_output"
                     rodape "Upgrade finalizado!!!" 2
