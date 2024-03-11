@@ -136,7 +136,7 @@ end_report () {
 
     write_html_page "$(echo -e "$(report_update "$update_output")")"  \
                     "$(echo -e "$(report_upgradables "$lista_pacotes")")" \
-                    "$(echo -e "$(report_upgrade "$upgrade_output")")" >> "$path_to_log$log_filename"
+                    "$(echo -e "$(report_upgrade "$upgrade_output")")" > "$path_to_log$log_filename"
 }
 
 # ====== main ======
