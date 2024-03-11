@@ -131,8 +131,9 @@ return
 }
 
 end_report () {
+    stime=$(date +%H%M%S)
     path_to_log="/media/mgfacioli/PortableSSD/Learning/Linux/Bash_scripts/super_update/"
-    log_filename="log_atualizacao_[${dia}/${mes}/${ano}]_[${time}].html"
+    log_filename="log_atualizacao_${dia}${mes}${ano}_${stime}.html"
 
     write_html_page "$(echo -e "$(report_update "$update_output")")"  \
                     "$(echo -e "$(report_upgradables "$lista_pacotes")")" \
